@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vargi-Bots</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.slim.min.js">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js">
+    <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+    crossorigin=""
+    />
+
+    <script
+    src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+    crossorigin=""
+    ></script>
+</head>
+<body>
+        <!-- Navigation -->
+<!-- <nav class="navbar navbar-custom navbar-expand-lg navbar-dark bg-dark static-top"></nav> -->
+<nav class="navbar navbar-expand-lg navbar-dark static-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <div id="eyantraLogo">
+            <img src="https://eyic.e-yantra.org/img/eYantra_logo_whitetext.png" alt="e_yantra_logo" width="290" height="60" position="Left">
+        </div>
+          </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div id="VB1188"><center><font color= "white"><h3>VB#1188 Warehouse Dashboard</h3></font></center></div>
+          
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="index.html">Home
+                  <span class="sr-only">(current)</span>
+                </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="map.html">Map</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="graph.html">Graph</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="table.html">Table</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+    <div id="map1"></div>
+</body>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script>
+    /////////////Ajax Requests////////////
+    $(document).ready(function() {
+        // Fetch the initial Map
+        refreshMap();
+    
+        // Fetch every 5 second
+        setInterval(refreshMap, 5000);
+    });
+
+    function refreshMap(){
+        var container = L.DomUtil.get('map1');
+
+        if(container != null){
+        container._leaflet_id = null;
+        }
+         
+        var map = L.map('map1').setView([20.5937, 78.9629], 4);
+        var jsonDataObject =[];
+
+        $.getJSON('https://spreadsheets.google.com/feeds/list/1c3uSYXlh9nmex471dCwI7azJhOZNvxeC8kVo2wIFXEg/5/public/full?alt=json', function(data) {
+        for (var i = 0; i < data.feed.entry.length; ++i) {
+
+            var json_data = {
+                "City": data.feed.entry[i].gsx$city.$t,
+                "OderID" : data.feed.entry[i].gsx$orderid.$t,
+                "Item" : data.feed.entry[i].gsx$item.$t,
+                "Latitude": parseFloat(data.feed.entry[i].gsx$latitude.$t),
+                "Longitude": parseFloat(data.feed.entry[i].gsx$longitude.$t),
+                "DispatchStatus":data.feed.entry[i].gsx$orderdispatched.$t,
+                "ShipStatus":data.feed.entry[i].gsx$ordershipped.$t
+            };
+            jsonDataObject.push(json_data);
+            var yellowIcon =new L.icon({iconUrl: 'yellow.png',
+                                        shadowUrl: 'shadow.png',
+                                        iconSize: [25, 41],
+                                        iconAnchor: [12, 41],
+                                        popupAnchor: [1, -34],
+                                        shadowSize: [41, 41]
+                                       });
+
+            var greenIcon = new L.Icon({iconUrl: 'green.png',
+                                        shadowUrl: 'shadow.png',
+                                        iconSize: [25, 41],
+                                        iconAnchor: [12, 41],
+                                        popupAnchor: [1, -34],
+                                        shadowSize: [41, 41]
+                                        });
+            var redIcon = new L.icon({iconUrl: 'red.png',
+                                      shadowUrl: 'shadow.png',
+                                      iconSize: [25, 41],
+                                      iconAnchor: [12, 41],
+                                      popupAnchor: [1, -34],
+                                      shadowSize: [41, 41]
+                                      });
+
+
+            for (var j = 0; j < jsonDataObject.length; j++) {
+                if (jsonDataObject[j].DispatchStatus == "NO" && jsonDataObject[j].ShipStatus == "NO"){    
+                var marker = L.marker(L.latLng(parseFloat(jsonDataObject[j].Latitude), parseFloat(jsonDataObject[j].Longitude)),{icon:redIcon});
+                    marker.bindPopup(jsonDataObject[j].City, {
+                        autoClose: false
+                });
+                map.addLayer(marker);
+                marker.on('click', onClick_Marker)}
+                else if (jsonDataObject[j].DispatchStatus == "YES" && jsonDataObject[j].ShipStatus =="NO"){
+                    var marker = L.marker(L.latLng(parseFloat(jsonDataObject[j].Latitude), parseFloat(jsonDataObject[j].Longitude)),{  icon:yellowIcon});
+                        marker.bindPopup(jsonDataObject[j].City, {
+                        autoClose: false
+                        });
+                    map.addLayer(marker);
+                    marker.on('click', onClick_Marker)}
+                else if (jsonDataObject[j].DispatchStatus == "YES" && jsonDataObject[j].ShipStatus == "YES"){
+                    var marker = L.marker(L.latLng(parseFloat(jsonDataObject[j].Latitude), parseFloat(jsonDataObject[j].Longitude)),{icon:greenIcon});
+                        marker.bindPopup(jsonDataObject[j].City, {
+                            autoClose: false
+                });
+                map.addLayer(marker);
+                marker.on('click', onClick_Marker)}
+                // map.addLayer(marker);
+                // marker.on('click', onClick_Marker)
+                // Attach the corresponding JSON data to your marker:
+                marker.myJsonData =jsonDataObject[j];
+        
+                function onClick_Marker(e) {
+                        var marker = e.target;
+                        if (marker.myJsonData.DispatchStatus == "NO" && marker.myJsonData.ShipStatus == "NO"){
+                        popup = L.popup()
+                        .setLatLng(marker.getLatLng())
+                        .setContent("Order ID: " + marker.myJsonData.OderID + " || Dispatched " + "NO" + " || Shipped " + "NO")
+                        .openOn(map);
+                        }
+                        else if (marker.myJsonData.DispatchStatus == "YES" && marker.myJsonData.ShipStatus == "NO"){
+                        popup = L.popup()
+                        .setLatLng(marker.getLatLng())
+                        .setContent("Order ID: " + marker.myJsonData.OderID + " || Dispatched " + "YES" + " || Shipped " + "NO")
+                        .openOn(map);
+                        }
+
+                        else if (marker.myJsonData.DispatchStatus == "YES" && marker.myJsonData.ShipStatus == "YES"){
+                        popup = L.popup()
+                        .setLatLng(marker.getLatLng())
+                        .setContent("Order ID: " + marker.myJsonData.OderID + " || Dispatched " + "YES" + " || Shipped " + "YES")
+                        .openOn(map);
+                        }
+
+
+                    }
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map); 
+                    
+
+                }
+            }
+        });
+    }
+
+</script>
+</html>

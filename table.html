@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>table</title>
+    <link rel="stylesheet" href="main.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.slim.min.js">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js">
+    <link rel="stylesheet" href="main.css">
+</head>
+<header>
+    <center>
+        <div id="eyantraLogo">
+            <!-- eyantra logo -->
+            <!--img src="https://eyic.e-yantra.org/img/eYantra_logo_whitetext.png" alt="e_yantra_logo" width="290" height="60"--><br>
+        </div>
+    </center>
+</header>
+<body>
+            <!-- Navigation -->
+<!-- <nav class="navbar navbar-custom navbar-expand-lg navbar-dark bg-dark static-top"></nav> -->
+<nav class="navbar navbar-expand-lg navbar-dark static-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <div id="eyantraLogo">
+            <img src="https://eyic.e-yantra.org/img/eYantra_logo_whitetext.png" alt="e_yantra_logo" width="290" height="60" position="Left">
+        </div>
+          </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div id="VB1188"><center><font color= "white"><h3>VB#1188 Warehouse Dashboard</h3></font></center></div>
+          
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="index.html">Home
+                  <span class="sr-only">(current)</span>
+                </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="map.html">Map</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="graph.html">Graph</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="table.html">Table</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+    <!--center><h2>VB#1188 Dashboard Module 2</h2></center-->
+        <!--hr style="height:4px;border-width:0;color:gray;background-color:gray"-->
+   	
+   		<center><table id="table1" border='3' align="center" text-align = "center">
+            <tr>
+                <th>Order ID</th>
+                <th>Item</th>
+                <th>Priority</th>
+                <th>City</th>
+                <th>Dispatched</th>
+                <th>Shipped</th>
+                <th>Order Date and Time</th>
+                <th>Dispatch Date and Time</th>
+                <th>Shipping Date and Time</th>
+                <th>Time Taken</th>
+            </tr>
+            <tbody id="tableContent">
+            </tbody>
+        </table></center>
+
+        <!--hr style="height:4px;border-width:0;color:gray;background-color:gray"-->
+
+</body>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+<script>
+    /////////////Ajax Requests////////////
+    $(document).ready(function() {
+        // Fetch the initial table
+        refreshTable();
+    
+        // Fetch every 1 second
+        setInterval(refreshTable, 1000);
+    });
+    
+    function refreshTable(){
+        
+        // var trHTML = '';	    
+        
+        $.getJSON('https://spreadsheets.google.com/feeds/list/1c3uSYXlh9nmex471dCwI7azJhOZNvxeC8kVo2wIFXEg/5/public/full?alt=json', function(data) {
+        	
+            	var trHTML = '';
+
+            	for (var i = 0; i < data.feed.entry.length; ++i) {
+                	var myData_map, myData_order;
+
+                    trHTML += '<tr><td>' + data.feed.entry[i].gsx$orderid.$t + 
+                              '</td><td>' + data.feed.entry[i].gsx$item.$t + 
+                              '</td><td>' + data.feed.entry[i].gsx$priority.$t + 
+                              '</td><td>'  + data.feed.entry[i].gsx$city.$t + 
+                              '</td><td>'  + data.feed.entry[i].gsx$orderdispatched.$t + 
+                              '</td><td>'  + data.feed.entry[i].gsx$ordershipped.$t + 
+                              '</td><td>'  + data.feed.entry[i].gsx$ordertime.$t + 
+                              '</td><td>'  + data.feed.entry[i].gsx$dispatchtime.$t + 
+                              '</td><td>'  + data.feed.entry[i].gsx$shippingtime.$t +
+                              '</td><td>'  + data.feed.entry[i].gsx$timetaken.$t + 
+                              '</td></tr>';
+
+                }
+
+                console.log(trHTML);
+        		$('#tableContent').html(trHTML);
+        		var trHTML = '';
+
+        	});	 
+    }	
+    
+</script>
+</html>
+
